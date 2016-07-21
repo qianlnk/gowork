@@ -1,9 +1,9 @@
 # gowork
-	gowork is a package for control goroutine number.You may compile func worker by your self, then func type is:</br>
+gowork is a package for control goroutine's number.You must compile func worker by your self, the func type is:
 ```golang
 type WorkFunction func(request interface{}, response interface{})
 ```
-	you can transfer params by `request`, of course,if you have more params you may packaging them as a struct.
+you can transfer param by `request`, of course, if you have more params you may packaging them as a struct.
 # use
 if the worker has no param and result.
 ```golang
