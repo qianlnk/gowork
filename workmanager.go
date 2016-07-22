@@ -58,7 +58,7 @@ func (w *WorkManager) NewGoroutine(name string, gtnum int, f WorkFunction, res i
 
 func (w *WorkManager) AddRequest(name string, req interface{}) error {
 	w.mutex.Lock()
-	w.mutex.Unlock()
+	defer w.mutex.Unlock()
 
 	if _, ok := w.goworks[name]; !ok {
 		return errors.New(fmt.Sprintf("goworker: %s not exist.", name))
@@ -71,6 +71,7 @@ func (w *WorkManager) AddRequest(name string, req interface{}) error {
 func (w *WorkManager) Done(name string) error {
 	w.mutex.Lock()
 	if _, ok := w.goworks[name]; !ok {
+		w.mutex.Unlock()
 		return errors.New(fmt.Sprintf("goworker: %s not exist.", name))
 	}
 
