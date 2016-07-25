@@ -49,10 +49,10 @@ func (w *WorkManager) unregister(name string) error {
 
 /***************************************************
 Function:	create a new goroutine
-Parameters:	name		[IN]		the worker name
-			gtnum	[IN]		the goroutine number
-			f		[IN]		worker function
-			res		[OUT]	store the worker result
+Parameters:	name	[IN]	the worker name
+		gtnum	[IN]	the goroutine number
+		f	[IN]	worker function
+		res	[OUT]	store the worker result
 ****************************************************/
 func (w *WorkManager) NewGoroutine(name string, gtnum int, f WorkFunction, res interface{}) error {
 	err := w.register(name, gtnum, f)
@@ -65,8 +65,8 @@ func (w *WorkManager) NewGoroutine(name string, gtnum int, f WorkFunction, res i
 
 /***************************************************
 Function:	add a request param to the specified worker
-Parameters:	name		[IN]		the worker name
-			req		[IN]		the request param
+Parameters:	name	[IN]	the worker name
+		req	[IN]	the request param
 ****************************************************/
 func (w *WorkManager) AddRequest(name string, req interface{}) error {
 	w.mutex.Lock()
@@ -82,7 +82,7 @@ func (w *WorkManager) AddRequest(name string, req interface{}) error {
 
 /***************************************************
 Function:	close the specified worker and unregister it
-Parameters:	name		[IN]		the worker name
+Parameters:	name	[IN]	the worker name
 ****************************************************/
 func (w *WorkManager) Done(name string) error {
 	w.mutex.Lock()
