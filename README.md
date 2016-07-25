@@ -1,4 +1,5 @@
 # gowork
+[![Build Status](https://travis-ci.org/qianlnk/gowork.svg?branch=master)](https://travis-ci.org/qianlnk/gowork)
 gowork is a package for control goroutine's number.You must compile func worker by your self, the func type is:
 ```golang
 type WorkFunction func(request interface{}, response interface{})
