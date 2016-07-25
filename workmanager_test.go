@@ -26,7 +26,7 @@ func sing(song interface{}, res interface{}) {
 }
 
 func routine(name interface{}, res interface{}) {
-	fmt.Printf("routine name is %s\n", name)
+	fmt.Printf("test routine name is %s\n", name)
 	time.Sleep(time.Nanosecond * 100)
 }
 
