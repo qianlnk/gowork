@@ -113,6 +113,7 @@ func main() {
 			}
 			wm.AddRequest("sayhello", pl)
 		}
+		wm.Done("sayhello")
 	}()
 	for i := 0; i < 20; i++ {
 		pl := People{
@@ -121,7 +122,6 @@ func main() {
 		}
 		wm.AddRequest("singsong", pl)
 	}
-	wm.Done("sayhello")
 	wm.Done("singsong")
 }
 
