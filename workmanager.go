@@ -29,6 +29,7 @@ func (w *WorkManager) register(name string, gtnum int, f WorkFunction) error {
 		goworker:   f,
 		request:    make(chan interface{}),
 		wg:         new(sync.WaitGroup),
+		timeout:    30,
 	}
 
 	w.goworks[name] = work
@@ -70,11 +71,10 @@ Parameters:	name	[IN]	the worker name
 ****************************************************/
 func (w *WorkManager) AddRequest(name string, req interface{}) error {
 	w.mutex.Lock()
-	defer w.mutex.Unlock()
-
 	if _, ok := w.goworks[name]; !ok {
 		return errors.New(fmt.Sprintf("goworker: %s not exist.", name))
 	}
+	w.mutex.Unlock()
 
 	w.goworks[name].addrequest(req)
 	return nil
@@ -96,4 +96,19 @@ func (w *WorkManager) Done(name string) error {
 	w.mutex.Unlock()
 	return w.unregister(name)
 
+}
+
+/***************************************************
+Function:	set a goroutine timeout, default 30s
+Parameters:	name	[IN]	the worker name
+		timeout	[IN]	a goroutine timeout
+****************************************************/
+func (w *WorkManager) SetTimeout(name string, timeout int) error {
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+	if _, ok := w.goworks[name]; !ok {
+		return errors.New(fmt.Sprintf("goworker: %s not exist.", name))
+	}
+	w.goworks[name].timeout = timeout
+	return nil
 }
