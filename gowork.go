@@ -1,20 +1,30 @@
 package gowork
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
 
 type WorkFunction func(request interface{}, response interface{})
 
+type exception struct {
+	handler WorkFunction
+	res     interface{}
+}
+
 type gowork struct {
-	routinenum int
-	goworker   WorkFunction
-	request    chan interface{}
-	wg         *sync.WaitGroup
-	timeout    int
-	mu         sync.Mutex
+	routinenum       int
+	goworker         WorkFunction
+	exceptionHandler exception //do some thing when exception happen
+	request          chan interface{}
+	wg               *sync.WaitGroup
+	timeout          int
+	mu               sync.Mutex
+}
+
+func defaultExceptionHandler(req interface{}, res interface{}) {
+	//fmt.Println("timeout")
+	return
 }
 
 func (g *gowork) workerpool(res interface{}) {
@@ -46,8 +56,8 @@ func (g *gowork) worker(res interface{}) {
 			}
 		case <-time.After(time.Duration(g.timeout) * time.Second):
 			{
-				fmt.Println("timeout")
-				//res = nil
+				g.exceptionHandler.handler(req, g.exceptionHandler.res)
+				continue
 			}
 		}
 	}
