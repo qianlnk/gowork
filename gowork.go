@@ -14,11 +14,15 @@ type gowork struct {
 	request    chan interface{}
 	wg         *sync.WaitGroup
 	timeout    int
+	mu         sync.Mutex
 }
 
 func (g *gowork) workerpool(res interface{}) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	for i := 0; i < g.routinenum; i++ {
-		g.wg.Add(1)
+		g.waitgroupAdd(1)
 		go g.worker(res)
 
 	}
@@ -27,7 +31,7 @@ func (g *gowork) workerpool(res interface{}) {
 //when the worker timeout let waitgroup done but it still run a goroutine, I can't
 //set the res nil due to it may be a IN/OUT param.
 func (g *gowork) worker(res interface{}) {
-	defer g.wg.Done()
+	defer g.waitgroupDone()
 	for req := range g.request {
 		done := make(chan bool)
 		go func(req, res interface{}) {
@@ -50,5 +54,27 @@ func (g *gowork) worker(res interface{}) {
 }
 
 func (g *gowork) addrequest(req interface{}) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	g.request <- req
+}
+
+func (g *gowork) close() {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	close(g.request)
+}
+
+func (g *gowork) waitgroupAdd(delta int) {
+	g.wg.Add(delta)
+}
+
+func (g *gowork) waitgroupDone() {
+	g.wg.Done()
+}
+
+func (g *gowork) waitgroupWait() {
+	g.wg.Wait()
 }

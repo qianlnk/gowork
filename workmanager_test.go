@@ -44,9 +44,10 @@ func TestWork(t *testing.T) {
 	go func() {
 		for i := 0; i < 4000; i++ {
 			fmt.Println("sing")
-			gw.AddRequest("sing", fmt.Sprintf("song%d", i))
+			err := gw.AddRequest("sing", fmt.Sprintf("song%d", i))
+			fmt.Println(err)
 		}
-		gw.Done("sing")
+
 	}()
 	for i := 0; i < 4000; i++ {
 		fmt.Println("routine")
@@ -56,6 +57,7 @@ func TestWork(t *testing.T) {
 		}
 	}
 	gw.Done("hello")
+	gw.Done("sing")
 	gw.Done("routine")
 
 	for _, r := range res.name {

@@ -11,6 +11,10 @@ type WorkManager struct {
 	mutex   sync.Mutex
 }
 
+const (
+	worker_not_exist = "goworker: %s not exist."
+)
+
 func NewWorkManager() *WorkManager {
 	return &WorkManager{
 		goworks: make(map[string]*gowork),
@@ -21,7 +25,7 @@ func (w *WorkManager) register(name string, gtnum int, f WorkFunction) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	if _, ok := w.goworks[name]; ok {
-		return errors.New(fmt.Sprintf("goworker: %s exist.", name))
+		return errors.New(fmt.Sprintf(worker_not_exist, name))
 	}
 
 	work := &gowork{
@@ -41,7 +45,7 @@ func (w *WorkManager) unregister(name string) error {
 	defer w.mutex.Unlock()
 
 	if _, ok := w.goworks[name]; !ok {
-		return errors.New(fmt.Sprintf("goworker: %s not exist.", name))
+		return errors.New(fmt.Sprintf(worker_not_exist, name))
 	}
 
 	delete(w.goworks, name)
@@ -72,7 +76,8 @@ Parameters:	name	[IN]	the worker name
 func (w *WorkManager) AddRequest(name string, req interface{}) error {
 	w.mutex.Lock()
 	if _, ok := w.goworks[name]; !ok {
-		return errors.New(fmt.Sprintf("goworker: %s not exist.", name))
+		w.mutex.Unlock()
+		return errors.New(fmt.Sprintf(worker_not_exist, name))
 	}
 	w.mutex.Unlock()
 
@@ -88,12 +93,13 @@ func (w *WorkManager) Done(name string) error {
 	w.mutex.Lock()
 	if _, ok := w.goworks[name]; !ok {
 		w.mutex.Unlock()
-		return errors.New(fmt.Sprintf("goworker: %s not exist.", name))
+		return errors.New(fmt.Sprintf(worker_not_exist, name))
 	}
 
-	close(w.goworks[name].request)
-	w.goworks[name].wg.Wait()
+	w.goworks[name].close()
+	w.goworks[name].waitgroupWait()
 	w.mutex.Unlock()
+	fmt.Println(name, "done")
 	return w.unregister(name)
 
 }
@@ -107,7 +113,7 @@ func (w *WorkManager) SetTimeout(name string, timeout int) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	if _, ok := w.goworks[name]; !ok {
-		return errors.New(fmt.Sprintf("goworker: %s not exist.", name))
+		return errors.New(fmt.Sprintf(worker_not_exist, name))
 	}
 	w.goworks[name].timeout = timeout
 	return nil
